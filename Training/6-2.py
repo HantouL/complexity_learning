@@ -49,7 +49,7 @@ def get_pdf(G, kmin, kmax):
         Pk.append(c/N)
     return k, Pk
 
-samples = 10
+samples = 100
 N = 1000
 kmin, kmax = 0, 40
 avk = 20  # 期望的平均度
