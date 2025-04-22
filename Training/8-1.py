@@ -1,66 +1,72 @@
 import matplotlib
+
 matplotlib.use('TkAgg')
 
 import random
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm  # 导入 tqdm 用于进度条
+from tqdm import tqdm
 
 
 def ba_graph(N, m0, m):
     # 初始化图
     G = nx.complete_graph(m0)
-    # nx.draw(G)
-    # plt.show()
 
-    # 增长
+    # 使用numpy数组存储度数，提高访问速度
+    degrees = np.array([m0 - 1] * m0, dtype=float)
+    total_degree = np.sum(degrees)
+
+    # 预分配边列表以减少动态调整
+    edges = list(G.edges())
+
+    # 使用numpy的随机选择函数替代random.choices
+    nodes = np.arange(m0)
+
     for node in tqdm(range(m0, N), desc="Building BA Graph"):
-        # 引入一个新的节点
-        G.add_node(node)
-        # 将节点连到m个已存在的节点上
-        degrees = dict(G.degree())  # 把每个节点的度找出来
-        total_degrees = sum(degrees.values())  # 所有节点度的和
-        # 算出每个节点被连接的概率
-        nodes_list = list(G.nodes())
-        # probabilities = [degrees[node]/total_degrees for node in nodes_list]
-        if total_degrees == 0:
-            # 如果 total_degrees 为 0，均匀随机选择节点
-            probabilities = [1.0 / len(nodes_list) for _ in nodes_list]
+        # 计算连接概率
+        if total_degree == 0:
+            probs = np.ones(len(nodes)) / len(nodes)
         else:
-            # 否则使用优先连接概率
-            probabilities = [degrees[node] / total_degrees for node in nodes_list]
+            probs = degrees / total_degree
 
-        # 开始连接
-        selected_nodes = set()
-        while len(selected_nodes)<m:
-            chosen_node = random.choices(nodes_list, weights=probabilities, k=1)[0]
-            if chosen_node != node and chosen_node not in selected_nodes:
-                G.add_edge(node, chosen_node)
-                selected_nodes.add(chosen_node)
+        # 使用numpy随机选择m个节点
+        targets = np.random.choice(nodes, size=m, replace=False, p=probs)
+
+        # 添加边
+        new_edges = [(node, target) for target in targets]
+        edges.extend(new_edges)
+
+        # 更新度数
+        degrees = np.pad(degrees, (0, 1), mode='constant')  # 添加新节点
+        degrees[targets] += 1  # 更新目标节点度数
+        degrees[node] = m  # 新节点度数
+        total_degree += 2 * m  # 每次添加m条边，总度数增加2m
+        nodes = np.arange(node + 1)  # 更新节点列表
+
+    G = nx.Graph()
+    G.add_nodes_from(range(N))
+    G.add_edges_from(edges)
 
     return G
 
-# 计算度分布
-# 返回度和对应的概率
-def degree_destribution(G):
-    degrees = [d for n,d in G.degree()]
-    max_degree = max(degrees)
-    # 每个度出现次数
-    degree_cnts = np.bincount(degrees)
-    # 计算度分布
-    degree_prob = degree_cnts/len(degrees)
-    return range(len(degree_prob)), degree_prob
 
-# 图8-2 不同m的度分布
+def degree_distribution(G):
+    """计算度分布"""
+    degrees = np.array([d for _, d in G.degree()])
+    degree_counts = np.bincount(degrees)
+    degree_prob = degree_counts / len(degrees)
+    return np.arange(len(degree_prob)), degree_prob
+
+
 def show_diff_m():
-    N = 300000
-    m_values = [1,3,5,7]
+    N = 30000
+    m_values = [1, 3, 5, 7]
 
-    plt.figure(figsize=(8,6))
+    plt.figure(figsize=(8, 6))
     for m in m_values:
         G = ba_graph(N, m, m)
-        k, pk = degree_destribution(G)
+        k, pk = degree_distribution(G)
         plt.scatter(k, pk, label=f'm_0 = {m}', s=10, alpha=0.6)
 
     plt.xscale('log')
@@ -73,18 +79,16 @@ def show_diff_m():
     plt.show()
 
 
-
-# 图8-3 不同N的度分布
 def show_diff_N():
-    N_values = [100000,150000,200000]
+    N_values = [10000, 15000, 20000]
     m = 5
-    m0=5
+    m0 = 5
 
-    plt.figure(figsize=(8,6))
+    plt.figure(figsize=(8, 6))
     for N in N_values:
         G = ba_graph(N, m0, m)
-        k, pk = degree_destribution(G)
-        plt.scatter(k, Pk, label=f'N = {N}', s=10, alpha=0.6)
+        k, pk = degree_distribution(G)
+        plt.scatter(k, pk, label=f'N = {N}', s=10, alpha=0.6)
 
     plt.xscale('log')
     plt.yscale('log')
@@ -94,6 +98,8 @@ def show_diff_N():
     plt.legend()
     plt.grid(True, which="both", ls="--")
     plt.show()
+
+
 
 show_diff_m()
 show_diff_N()
