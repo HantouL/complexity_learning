@@ -72,12 +72,11 @@ def show_diff_m():
     for i, m in enumerate(m_values):
         G = ba_graph(N, m, m)  # m0 = m
         k, pk = degree_distribution(G)
-        ax.scatter(k, pk, label=f'm={m}', s=30, alpha=1.0, marker=markers[i], color=colors[i], edgecolors='none')
+        ax.scatter(k, pk, label=f'm={m}', s=30, marker=markers[i], facecolors='none', edgecolors=colors[i])
 
         pk_rescaled = pk / (2 * m ** 2)  # 缩放P(k)
         mask = k < 1000
-        inset_ax.scatter(k[mask], pk_rescaled[mask], s=30, alpha=1.0, marker=markers[i], color=colors[i],
-                         edgecolors='none')
+        inset_ax.scatter(k[mask], pk_rescaled[mask], s=30, marker=markers[i], facecolors='none', edgecolors=colors[i])
 
     # 设置对数刻度
     ax.set_xscale('log')
@@ -86,6 +85,7 @@ def show_diff_m():
     ax.set_ylabel('$P(k)$')
     ax.set_title('different M')
     ax.legend()
+    ax.legend(loc='upper right', bbox_to_anchor=(0.98, 0.98), frameon=True)
     ax.grid(False)
 
     # 设置插图的对数刻度
@@ -110,7 +110,7 @@ def show_diff_N():
     for i, N in enumerate(N_values):
         G = ba_graph(N, m0, m)
         k, pk = degree_distribution(G)
-        ax.scatter(k, pk, label=f'N={N}', s=30, alpha=1.0, marker=markers[i], color=colors[i], edgecolors='none')
+        ax.scatter(k, pk, label=f'N={N}', s=30, alpha=1.0, marker=markers[i], facecolors='none', edgecolors=colors[i])
 
     # 设置对数刻度
     ax.set_xscale('log')
