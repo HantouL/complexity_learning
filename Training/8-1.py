@@ -61,7 +61,7 @@ def degree_distribution(G):
 
 # 不同m值的度分布
 def show_diff_m():
-    N = 30000  # 设置节点总数为300,00
+    N = 300000  # 设置节点总数为300,00
     m_values = [1, 3, 5, 7]  # 不同m值
     markers = ['o', 's', 'd', '^']  # 圆圈、方块、菱形、三角形
     colors = ['green', 'yellow', 'blue', 'red']
@@ -99,7 +99,7 @@ def show_diff_m():
 
 # 不同N值的度分布和时间演化插图
 def show_diff_N():
-    N_values = [10000, 15000, 20000]
+    N_values = [100000, 150000, 200000]
     m = 5
     m0 = 5
     markers = ['o', 's', 'd']  # 圆圈、方块、菱形
