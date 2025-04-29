@@ -1,4 +1,6 @@
 import networkx as nx
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
